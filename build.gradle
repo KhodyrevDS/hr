@@ -1,0 +1,57 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.8.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven { url "https://oss.sonatype.org/content/repositories/vaadin-snapshots" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("com.devsoap.plugin:gradle-vaadin-plugin:1.2.6")
+        classpath("com.vaadin:vaadin-spring-boot-starter:2.0.1")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.devsoap.plugin.vaadin'
+
+group = 'ru.kds'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+vaadin {
+    version = '8.1.6'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
+    }
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-mail')
+    compile('org.jtwig:jtwig-spring-boot-starter:5.86.1.RELEASE')
+    compile('com.vaadin:vaadin-spring-boot-starter')
+    compile("org.vaadin:viritin:2.1") { exclude group: 'com.vaadin' }
+    compile(group: 'com.google.guava', name: 'guava', version: '23.0')
+    compile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+}
+
+springBoot {
+    mainClass = 'ru.kds.hr.HrApplication'
+}
