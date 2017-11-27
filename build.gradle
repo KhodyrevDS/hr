@@ -17,6 +17,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.devsoap.plugin.vaadin'
 
@@ -49,7 +50,11 @@ dependencies {
     compile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+    testCompile(group: 'org.spockframework', name: 'spock-core', version: '1.1-groovy-2.4')
+    testCompile(group: 'org.spockframework', name: 'spock-spring', version: '1.1-groovy-2.4')
+    compile(group: 'cglib', name: 'cglib-nodep', version: '3.2.5')
+
+
 }
 
 springBoot {
