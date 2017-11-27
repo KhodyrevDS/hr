@@ -39,7 +39,7 @@ public class EmailService {
         message.setFrom(senderEmail, senderName);
         message.setSubject(subject);
 
-        JtwigTemplate template = JtwigTemplate.fileTemplate(body);
+        JtwigTemplate template = JtwigTemplate.inlineTemplate(body);
         JtwigModel model = JtwigModel.newModel().with("model", mailModel);
 
         String text = template.render(model);

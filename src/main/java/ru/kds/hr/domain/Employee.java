@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import static ru.kds.hr.domain.EmployeeStatus.FIRED;
@@ -19,14 +21,18 @@ public class Employee extends AbstractPersistable<Long> implements Serializable 
 
     private static final long serialVersionUID = -206638984257962667L;
 
+    @Email
+    @NotEmpty
     @Column(nullable = false)
     private String email;
 
+    @NotEmpty
     @Column(nullable = false)
     private String firstName;
 
     private String middleName;
 
+    @NotEmpty
     @Column(nullable = false)
     private String lastName;
 
@@ -67,7 +73,11 @@ public class Employee extends AbstractPersistable<Long> implements Serializable 
     }
 
     public String getFullName() {
-        return Joiner.on(" ").useForNull("").join(lastName, middleName, firstName);
+        return Joiner.on(" ").useForNull("").join(lastName, firstName, middleName);
+    }
+
+    public EmployeeStatus getStatus() {
+        return status;
     }
 
     public void fire() {

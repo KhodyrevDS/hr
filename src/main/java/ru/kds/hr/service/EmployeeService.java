@@ -4,8 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kds.hr.domain.Employee;
 import ru.kds.hr.domain.EmployeeRepository;
+import ru.kds.hr.domain.EmployeeStatus;
 
 /**
  * Employee service
@@ -37,6 +39,7 @@ public class EmployeeService {
      * @param middleName middle name
      * @return the hired employee
      */
+    @Transactional
     public Employee hire(String email, String lastName, String firstName, String middleName) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(lastName), "parameter 'email' is empty");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(lastName), "parameter 'lastName' is empty");
@@ -100,6 +103,7 @@ public class EmployeeService {
      * @param middleName middle name
      * @return the updated employee
      */
+    @Transactional
     public Employee update(Long id, String email, String lastName, String firstName, String middleName)
             throws ObjectNotFoundException {
         Preconditions.checkArgument(id != null, "parameter 'id' is null");
@@ -121,9 +125,13 @@ public class EmployeeService {
      *
      * @param id employee identifier
      */
+    @Transactional
     public void fire(Long id) throws ObjectNotFoundException {
         Preconditions.checkArgument(id != null, "parameter 'id' is null");
         Employee employee = get(id);
+        if (employee.getStatus() == EmployeeStatus.FIRED) {
+            return;
+        }
         employee.fire();
 
         employeeRepository.save(employee);
