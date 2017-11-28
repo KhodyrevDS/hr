@@ -3,6 +3,7 @@ package ru.kds.hr.service
 import org.springframework.data.domain.PageImpl
 import ru.kds.hr.domain.Employee
 import ru.kds.hr.domain.EmployeeRepository
+import ru.kds.hr.domain.EmployeeStatus
 import spock.lang.Specification
 
 /**
@@ -35,6 +36,7 @@ class EmployeeServiceSpec extends Specification {
         employee.lastName == lastName
         employee.firstName == firstName
         employee.middleName == middleName
+        employee.status == EmployeeStatus.HIRED
     }
 
     def 'should get employee by id'() {
@@ -115,12 +117,78 @@ class EmployeeServiceSpec extends Specification {
 
         then:
         1 * employeeRepository.findOne(givenEmployee.id) >> givenEmployee
-        1 * employeeRepository.save(givenEmployee)
+        1 * employeeRepository.save(givenEmployee) >> { Employee toSave -> toSave }
 
         and:
         employee.email == email
         employee.lastName == lastName
         employee.firstName == firstName
         employee.middleName == middleName
+        employee.status == EmployeeStatus.HIRED
+    }
+
+    def 'update employee should throw ObjectNotFoundException if employee does not exist'() {
+        given:
+        Employee givenEmployee = new Employee()
+        givenEmployee.id = 33
+
+        String email = 'new@example.com'
+        String lastName = 'lastName'
+        String firstName = 'firstName'
+        String middleName = 'middleName'
+
+        when:
+        Employee employee = employeeService.update(givenEmployee.id, email, lastName, firstName, middleName)
+
+        then:
+        1 * employeeRepository.findOne(givenEmployee.id) >> null
+        0 * employeeRepository.save(_)
+
+        and:
+        thrown ObjectNotFoundException
+    }
+
+    def 'should fire employee'() {
+        given:
+        Employee givenEmployee = new Employee()
+        givenEmployee.id = 33
+        givenEmployee.email = 'old@example.com'
+        givenEmployee.lastName = 'oldLastName'
+        givenEmployee.firstName = 'oldFirstName'
+        givenEmployee.middleName = 'oldMiddleName'
+
+        Employee employee
+
+        when:
+        employeeService.fire(givenEmployee.id)
+
+        then:
+        1 * employeeRepository.findOne(givenEmployee.id) >> givenEmployee
+        1 * employeeRepository.save(givenEmployee) >> { Employee toSave -> employee = toSave }
+        1 * eventProducer.createEmployeeFiredEvent(givenEmployee);
+
+        and:
+        employee.email == 'old@example.com'
+        employee.lastName == 'oldLastName'
+        employee.firstName == 'oldFirstName'
+        employee.middleName == 'oldMiddleName'
+        employee.status == EmployeeStatus.FIRED
+    }
+
+    def 'fire employee should throw ObjectNotFoundException if employee does not exist'() {
+        given:
+        Employee givenEmployee = new Employee()
+        givenEmployee.id = 33
+
+        when:
+        employeeService.fire(givenEmployee.id)
+
+        then:
+        1 * employeeRepository.findOne(givenEmployee.id) >> null
+        0 * employeeRepository.save(_)
+        0 * eventProducer.createEmployeeFiredEvent(_);
+
+        and:
+        thrown ObjectNotFoundException
     }
 }
